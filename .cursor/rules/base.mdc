@@ -1,0 +1,428 @@
+---
+alwaysApply: true
+---
+## 🏗️ **KIẾN TRÚC STARTKIT**
+
+### **Cấu Trúc Thư Mục Backend**
+```
+backend/src/modules/
+├── api/                    # API Controllers & Swagger
+│   ├── controllers/        # REST API endpoints
+│   ├── guards/            # Authentication guards
+│   ├── interceptors/      # Response formatting
+│   └── dto/              # Data Transfer Objects
+├── business/              # Business Logic Services
+│   ├── services/          # Core business services
+│   ├── validators/        # Business validation
+│   └── factories/         # Service factories
+├── database/              # Database Layer
+│   ├── entities/          # TypeORM entities
+│   ├── repositories/      # Custom repositories
+│   ├── migrations/        # Database migrations
+│   └── seeders/           # Data seeding
+├── worker/                # Background Workers
+│   ├── consumers/         # Queue consumers
+│   ├── schedulers/        # Cron jobs
+│   └── processors/        # Job processors
+├── queue/                 # Queue Management
+│   ├── queues/            # Queue definitions
+│   └── processors/        # Queue processors
+├── websocket/             # Real-time Communication
+│   ├── gateways/          # Socket.io gateways
+│   └── events/            # WebSocket events
+└── shared/                # Shared Utilities
+    ├── constants/         # App constants
+    ├── decorators/        # Custom decorators
+    └── utils/             # Utility functions
+```
+
+### **Quy Tắc Phân Chia Module**
+
+#### **1. API Layer (`modules/api/`)**
+```typescript
+// ✅ ĐÚNG - Controller trong api/controllers
+@Controller('shops')
+@ApiTags('Shop Management')
+export class ShopController {
+  constructor(private readonly shopService: ShopService) {}
+  
+  @Get()
+  @ApiOperation({ summary: 'Lấy danh sách cửa hàng' })
+  async getShops() {
+    return this.shopService.findAll();
+  }
+}
+
+// ❌ SAI - Controller trong business/
+export class ShopController { }
+```
+
+#### **2. Business Layer (`modules/business/services/`)**
+```typescript
+// ✅ ĐÚNG - Service trong business/services
+@Injectable()
+export class ShopService {
+  constructor(
+    private readonly shopRepository: ShopRepository,
+    private readonly openAIService: OpenAIService
+  ) {}
+  
+  async findAll(): Promise<Shop[]> {
+    return this.shopRepository.find();
+  }
+}
+
+// ❌ SAI - Service trong api/
+export class ShopService { }
+```
+
+#### **3. Database Layer (`modules/database/`)**
+```typescript
+// ✅ ĐÚNG - Repository trong database/repositories
+@Injectable()
+export class ShopRepository extends Repository<ShopEntity> {
+  async findByLocation(lat: number, lng: number, radius: number = 10) {
+    return this.createQueryBuilder('shop')
+      .where('ST_DWithin(shop.location, ST_Point(:lng, :lat), :radius)',
+        { lng, lat, radius })
+      .getMany();
+  }
+}
+
+// ❌ SAI - Repository trong business/
+export class ShopRepository { }
+```
+
+#### **4. Worker Layer (`modules/worker/`)**
+```typescript
+// ✅ ĐÚNG - Consumer trong worker/consumers
+@Processor('chatbot')
+export class ChatbotConsumer {
+  @Process('process-message')
+  async processMessage(job: Job<ProcessMessageDto>) {
+    // Background job processing
+  }
+}
+
+// ❌ SAI - Consumer trong business/
+export class ChatbotConsumer { }
+```
+
+---
+
+## 🔐 **HỆ THỐNG PHÂN QUYỀN (RBAC)**
+
+### **Role Hierarchy**
+```typescript
+// ✅ ĐÚNG - Sử dụng RBAC system
+export enum UserRole {
+  SYSTEM_ADMIN = 'system_admin',
+  SHOP_OWNER = 'shop_owner', 
+  SHOP_MANAGER = 'shop_manager',
+  SHOP_STAFF = 'shop_staff',
+  CUSTOMER_SERVICE = 'customer_service',
+  CUSTOMER = 'customer'
+}
+
+// ❌ SAI - Simple role string
+const role = 'admin';
+```
+
+### **Permission Checking**
+```typescript
+// ✅ ĐÚNG - Sử dụng permission decorator
+@UseGuards(JwtAuthGuard, PermissionGuard)
+@RequirePermissions('shop:read', 'own_shops')
+@Get('my-shops')
+async getMyShops(@CurrentUser() user: User) {
+  return this.shopService.findByOwner(user.id);
+}
+
+// ❌ SAI - Manual permission check
+@Get('my-shops')
+async getMyShops(@CurrentUser() user: User) {
+  if (user.role !== 'shop_owner') {
+    throw new ForbiddenException();
+  }
+}
+```
+
+---
+
+## 📝 **API DOCUMENTATION**
+
+### **Swagger Documentation**
+```typescript
+// ✅ ĐÚNG - Complete Swagger documentation
+@Controller('shops')
+@ApiTags('Shop Management')
+export class ShopController {
+  
+  @Post()
+  @ApiOperation({
+    summary: 'Tạo cửa hàng mới',
+    description: 'Tạo một cửa hàng mới với thông tin cơ bản'
+  })
+  @ApiBody({ type: CreateShopDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Cửa hàng được tạo thành công',
+    type: StandardResponseDto<ShopResponseDto>
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Dữ liệu đầu vào không hợp lệ'
+  })
+  async createShop(@Body() createShopDto: CreateShopDto) {
+    return this.shopService.create(createShopDto);
+  }
+}
+
+// ❌ SAI - Missing Swagger documentation
+@Post()
+async createShop(@Body() dto: any) {
+  return this.shopService.create(dto);
+}
+```
+
+### **DTO Validation**
+```typescript
+// ✅ ĐÚNG - Complete DTO với validation
+export class CreateShopDto {
+  @ApiProperty({
+    description: 'Tên cửa hàng',
+    example: 'Cửa hàng ABC',
+    minLength: 3,
+    maxLength: 100
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(100)
+  name: string;
+
+  @ApiPropertyOptional({
+    description: 'Mô tả cửa hàng',
+    example: 'Cửa hàng chuyên bán đồ điện tử'
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
+}
+
+// ❌ SAI - Missing validation
+export class CreateShopDto {
+  name: string;
+  description?: string;
+}
+```
+
+---
+
+## 🔄 **RESPONSE FORMAT**
+
+### **Standard Response Format**
+```typescript
+// ✅ ĐÚNG - Sử dụng standard response format
+@Get()
+async getShops(): Promise<StandardResponseDto<ShopResponseDto[]>> {
+  const shops = await this.shopService.findAll();
+  
+  return {
+    statusCode: HttpStatus.OK,
+    message: 'Lấy danh sách cửa hàng thành công',
+    data: shops,
+    timestamp: new Date().toISOString()
+  };
+}
+
+// ❌ SAI - Return raw data
+@Get()
+async getShops(): Promise<Shop[]> {
+  return this.shopService.findAll();
+}
+```
+
+---
+
+## 🚀 **CONDITIONAL MODULE LOADING**
+
+### **Environment Variables**
+```typescript
+// ✅ ĐÚNG - Conditional module loading
+const isApi = Boolean(Number(process.env.IS_API || 0));
+const isWorker = Boolean(Number(process.env.IS_WORKER || 0));
+
+@Module({
+  imports: [
+    // Conditional modules
+    ...(isApi ? [ApiModule] : []),
+    ...(isWorker ? [WorkerModule] : []),
+    // Shared modules
+    BusinessModule,
+    DatabaseModule,
+    QueueModule,
+  ]
+})
+export class AppModule {}
+
+// ❌ SAI - Load all modules
+@Module({
+  imports: [ApiModule, WorkerModule, BusinessModule]
+})
+export class AppModule {}
+```
+
+---
+
+## 🧪 **TESTING PATTERNS**
+
+### **Unit Testing**
+```typescript
+// ✅ ĐÚNG - Test theo startkit patterns
+describe('ShopService', () => {
+  let service: ShopService;
+  let repository: ShopRepository;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [
+        ShopService,
+        {
+          provide: ShopRepository,
+          useValue: {
+            find: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<ShopService>(ShopService);
+    repository = module.get<ShopRepository>(ShopRepository);
+  });
+
+  it('should return shops list', async () => {
+    const mockShops = [/* mock data */];
+    jest.spyOn(repository, 'find').mockResolvedValue(mockShops);
+
+    const result = await service.findAll();
+    expect(result).toEqual(mockShops);
+  });
+});
+```
+
+---
+
+## 🔧 **ERROR HANDLING**
+
+### **Exception Handling**
+```typescript
+// ✅ ĐÚNG - Proper error handling
+@Injectable()
+export class ShopService {
+  async findById(id: string): Promise<Shop> {
+    try {
+      const shop = await this.shopRepository.findOne({ where: { id } });
+      
+      if (!shop) {
+        throw new NotFoundException(`Không tìm thấy cửa hàng với ID: ${id}`);
+      }
+      
+      return shop;
+    } catch (error) {
+      console.error(`[🔴] [ShopService] [findById] [error]:`, error);
+      throw error;
+    }
+  }
+}
+
+// ❌ SAI - No error handling
+async findById(id: string): Promise<Shop> {
+  return this.shopRepository.findOne({ where: { id } });
+}
+```
+
+---
+
+## 📊 **LOGGING PATTERNS**
+
+### **Structured Logging**
+```typescript
+// ✅ ĐÚNG - Structured logging với Pino
+@Injectable()
+export class ShopService {
+  private readonly logger = new Logger(ShopService.name);
+
+  async createShop(createShopDto: CreateShopDto): Promise<Shop> {
+    this.logger.log(`[✅] [ShopService] [createShop] [dto]:`, createShopDto);
+    
+    try {
+      const shop = await this.shopRepository.save(createShopDto);
+      this.logger.log(`[✅] [ShopService] [createShop] [result]:`, shop);
+      return shop;
+    } catch (error) {
+      this.logger.error(`[🔴] [ShopService] [createShop] [error]:`, error);
+      throw error;
+    }
+  }
+}
+
+// ❌ SAI - Console.log
+async createShop(dto: any) {
+  console.log('Creating shop:', dto);
+  return this.repository.save(dto);
+}
+```
+
+---
+
+## 🎯 **BEST PRACTICES**
+
+### **1. Dependency Injection**
+- Luôn sử dụng constructor injection
+- Không sử dụng `new` keyword trong services
+- Sử dụng interfaces cho loose coupling
+
+### **2. Type Safety**
+- Luôn định nghĩa types/interfaces
+- Sử dụng strict TypeScript config
+- Tránh sử dụng `any` type
+
+### **3. Performance**
+- Sử dụng caching cho expensive operations
+- Implement pagination cho large datasets
+- Optimize database queries với indexes
+
+### **4. Security**
+- Validate tất cả input data
+- Sử dụng RBAC cho authorization
+- Sanitize user inputs
+- Implement rate limiting
+
+---
+
+## 📚 **REFERENCES**
+
+- [NestJS Documentation](https://docs.nestjs.com/)
+- [TypeORM Documentation](https://typeorm.io/)
+- [Swagger Documentation](https://swagger.io/docs/)
+- [Bull Queue Documentation](https://docs.bullmq.io/)
+- [Socket.io Documentation](https://socket.io/docs/)
+
+---
+
+**🎯 Mục tiêu: Tất cả code phải tuân theo startkit patterns và best practices!**
+
+---
+description: Cursor Rules cho dự án ShopChat.vn - AI Chatbot bán hàng
+globs: 
+  - "**/*.ts"
+  - "**/*.js"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.md"
+  - "**/*.json"
+alwaysApply: true
+---
+

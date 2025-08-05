@@ -1,0 +1,218 @@
+# Startkit Patterns - ShopChat.vn Backend
+
+## 🏗️ **Module Structure**
+
+### **API Layer (`modules/api/`)**
+```typescript
+// ✅ ĐÚNG - Controller trong api/controllers
+@Controller('shops')
+@ApiTags('Shop Management')
+export class ShopController {
+  constructor(private readonly shopService: ShopService) {}
+  
+  @Get()
+  @ApiOperation({ summary: 'Lấy danh sách cửa hàng' })
+  async getShops() {
+    return this.shopService.findAll();
+  }
+}
+```
+
+### **Business Layer (`modules/business/services/`)**
+```typescript
+// ✅ ĐÚNG - Service trong business/services
+@Injectable()
+export class ShopService {
+  constructor(
+    private readonly shopRepository: ShopRepository,
+    private readonly openAIService: OpenAIService
+  ) {}
+  
+  async findAll(): Promise<Shop[]> {
+    return this.shopRepository.find();
+  }
+}
+```
+
+### **Database Layer (`modules/database/`)**
+```typescript
+// ✅ ĐÚNG - Repository trong database/repositories
+@Injectable()
+export class ShopRepository extends Repository<ShopEntity> {
+  async findByLocation(lat: number, lng: number, radius: number = 10) {
+    return this.createQueryBuilder('shop')
+      .where('ST_DWithin(shop.location, ST_Point(:lng, :lat), :radius)',
+        { lng, lat, radius })
+      .getMany();
+  }
+}
+```
+
+### **Worker Layer (`modules/worker/`)**
+```typescript
+// ✅ ĐÚNG - Consumer trong worker/consumers
+@Processor('chatbot')
+export class ChatbotConsumer {
+  @Process('process-message')
+  async processMessage(job: Job<ProcessMessageDto>) {
+    // Background job processing
+  }
+}
+```
+
+## 🔄 **Conditional Module Loading**
+
+```typescript
+// ✅ ĐÚNG - Conditional module loading
+const isApi = Boolean(Number(process.env.IS_API || 0));
+const isWorker = Boolean(Number(process.env.IS_WORKER || 0));
+
+@Module({
+  imports: [
+    // Conditional modules
+    ...(isApi ? [ApiModule] : []),
+    ...(isWorker ? [WorkerModule] : []),
+    // Shared modules
+    BusinessModule,
+    DatabaseModule,
+    QueueModule,
+  ]
+})
+export class AppModule {}
+```
+
+## 📝 **Swagger Documentation**
+
+```typescript
+// ✅ ĐÚNG - Complete Swagger documentation
+@Controller('shops')
+@ApiTags('Shop Management')
+export class ShopController {
+  
+  @Post()
+  @ApiOperation({
+    summary: 'Tạo cửa hàng mới',
+    description: 'Tạo một cửa hàng mới với thông tin cơ bản'
+  })
+  @ApiBody({ type: CreateShopDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Cửa hàng được tạo thành công',
+    type: StandardResponseDto<ShopResponseDto>
+  })
+  async createShop(@Body() createShopDto: CreateShopDto) {
+    return this.shopService.create(createShopDto);
+  }
+}
+```
+
+## 🔐 **RBAC Integration**
+
+```typescript
+// ✅ ĐÚNG - Sử dụng RBAC system
+@UseGuards(JwtAuthGuard, PermissionGuard)
+@RequirePermissions('shop:read', 'own_shops')
+@Get('my-shops')
+async getMyShops(@CurrentUser() user: User) {
+  return this.shopService.findByOwner(user.id);
+}
+```
+
+## 📊 **Structured Logging**
+
+```typescript
+// ✅ ĐÚNG - Structured logging với Pino
+@Injectable()
+export class ShopService {
+  private readonly logger = new Logger(ShopService.name);
+
+  async createShop(createShopDto: CreateShopDto): Promise<Shop> {
+    this.logger.log(`[✅] [ShopService] [createShop] [dto]:`, createShopDto);
+    
+    try {
+      const shop = await this.shopRepository.save(createShopDto);
+      this.logger.log(`[✅] [ShopService] [createShop] [result]:`, shop);
+      return shop;
+    } catch (error) {
+      this.logger.error(`[🔴] [ShopService] [createShop] [error]:`, error);
+      throw error;
+    }
+  }
+}
+```
+
+## 🔄 **Standard Response Format**
+
+```typescript
+// ✅ ĐÚNG - Sử dụng standard response format
+@Get()
+async getShops(): Promise<StandardResponseDto<ShopResponseDto[]>> {
+  const shops = await this.shopService.findAll();
+  
+  return {
+    statusCode: HttpStatus.OK,
+    message: 'Lấy danh sách cửa hàng thành công',
+    data: shops,
+    timestamp: new Date().toISOString()
+  };
+}
+```
+
+## 🧪 **Testing Patterns**
+
+```typescript
+// ✅ ĐÚNG - Test theo startkit patterns
+describe('ShopService', () => {
+  let service: ShopService;
+  let repository: ShopRepository;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [
+        ShopService,
+        {
+          provide: ShopRepository,
+          useValue: {
+            find: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<ShopService>(ShopService);
+    repository = module.get<ShopRepository>(ShopRepository);
+  });
+
+  it('should return shops list', async () => {
+    const mockShops = [/* mock data */];
+    jest.spyOn(repository, 'find').mockResolvedValue(mockShops);
+
+    const result = await service.findAll();
+    expect(result).toEqual(mockShops);
+  });
+});
+```
+
+## 🎯 **Best Practices**
+
+### **1. Dependency Injection**
+- Luôn sử dụng constructor injection
+- Không sử dụng `new` keyword trong services
+- Sử dụng interfaces cho loose coupling
+
+### **2. Type Safety**
+- Luôn định nghĩa types/interfaces
+- Sử dụng strict TypeScript config
+- Tránh sử dụng `any` type
+
+### **3. Performance**
+- Sử dụng caching cho expensive operations
+- Implement pagination cho large datasets
+- Optimize database queries với indexes
+
+### **4. Security**
+- Validate tất cả input data
+- Sử dụng RBAC cho authorization
+- Sanitize user inputs
+- Implement rate limiting
