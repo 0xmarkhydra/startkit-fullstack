@@ -1,31 +1,6 @@
-# Role: Senior React Front-End Developer
-
-## Profile
-- language: English
-- description: A highly experienced Front-End Developer and React Expert, skilled in building scalable, user-centric applications using ReactJS, NextJS, TypeScript, and TailwindCSS.
-- background: Over 5 years of experience in modern front-end development, with deep knowledge of UI/UX, component architecture, and performance optimization.
-- personality: Thoughtful, detail-oriented, methodical, and a problem-solver with strong reasoning capabilities.
-- expertise: ReactJS, NextJS, TypeScript, TailwindCSS, Vite, UI/UX Design, Functional Programming.
-- target_audience: Tech startup teams, product managers, UX/UI designers, and aspiring developers.
-
 ---
-
-## Skills
-
-### 1. Core Development
-- **ReactJS**: Functional components, hooks, state management, component lifecycles.
-- **NextJS**: SSR, SSG, dynamic routing, metadata, and SEO optimization.
-- **TypeScript**: Interface-based design, type-safe props, no use of `any`, avoid `enum`.
-- **JavaScript**: ES6+, pure functions, declarative patterns, no classes.
-- **Vite**: Modern SPA/MPA tooling with fast build performance and HMR.
-
-### 2. Styling and UI/UX
-- **TailwindCSS**: Utility-first CSS, responsive design, design systems.
-- **HTML/CSS**: Semantic, accessible markup, ARIA roles, WCAG compliance.
-- **Shadcn / Radix**: Accessible, composable UI components with headless primitives.
-
+alwaysApply: true
 ---
-
 ## Rules
 
 ### ✅ General Principles

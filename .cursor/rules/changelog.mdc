@@ -1,0 +1,254 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules - Startkit Platform Agent
+
+## 🎯 **Project Overview**
+Đây là dự án **Startkit Platform Agent** - một nền tảng AI Agent mở rộng với LangChain, hỗ trợ plug-and-play cho bất kỳ AI model nào.
+
+## 📋 **CHANGELOG Management Rules**
+
+### **Bắt buộc cập nhật CHANGELOG.md khi:**
+
+#### 1. **Hoàn thành tính năng lớn (Major Features)**
+- ✅ Tạo AI Agent service mới
+- ✅ Thêm model AI mới (OpenAI, Anthropic, DeepSeek, etc.)
+- ✅ Tạo tool/MCP mới
+- ✅ Thêm memory system mới
+- ✅ Tạo frontend component lớn
+- ✅ Thêm API endpoints mới
+- ✅ Cập nhật architecture patterns
+
+#### 2. **Hoàn thành module/documentation lớn**
+- ✅ Tạo documentation file mới (>100 lines)
+- ✅ Cập nhật architecture guides
+- ✅ Thêm coding standards mới
+- ✅ Tạo testing strategies
+- ✅ Thêm deployment guides
+
+#### 3. **Breaking changes hoặc major refactoring**
+- ✅ Thay đổi API structure
+- ✅ Refactor core components
+- ✅ Thay đổi database schema
+- ✅ Cập nhật major dependencies
+
+### **Format cho CHANGELOG entries:**
+
+```markdown
+## [Unreleased]
+
+### Added
+- **[Feature Name]**: Mô tả ngắn gọn tính năng được thêm
+  - Technical details (optional)
+  - Files changed: `path/to/file1`, `path/to/file2`
+  - Impact: Mô tả tác động đến project
+
+### Changed
+- **[Component Name]**: Mô tả thay đổi
+  - Before: Trạng thái cũ
+  - After: Trạng thái mới
+  - Files changed: `path/to/file1`, `path/to/file2`
+
+### Fixed
+- **[Issue/Bug]**: Mô tả bug được fix
+  - Root cause: Nguyên nhân
+  - Solution: Giải pháp
+  - Files changed: `path/to/file1`, `path/to/file2`
+```
+
+### **Workflow bắt buộc:**
+
+1. **Trước khi bắt đầu tính năng lớn:**
+   - Tạo TODO comment trong code
+   - Ghi rõ scope và expected changes
+
+2. **Trong quá trình development:**
+   - Track các files được thay đổi
+   - Ghi lại technical decisions
+
+3. **Khi hoàn thành tính năng:**
+   - **BẮT BUỘC** cập nhật CHANGELOG.md
+   - Thêm vào **Unreleased** section
+   - Ghi rõ category (Added/Changed/Fixed)
+   - Mô tả impact và technical details
+
+4. **Khi release version:**
+   - Move từ Unreleased sang version cụ thể
+   - Update version number
+   - Add release date
+
+## 🏗️ **Architecture Rules**
+
+### **AI Agent Components:**
+- Tất cả AI services phải implement trong `modules/business/services/`
+- Model factory phải support multiple AI providers
+- Tool registry phải có interface chuẩn
+- Memory system phải persistent với PostgreSQL
+
+### **Code Organization:**
+- Tuân thủ Startkit patterns
+- Sử dụng SOLID principles
+- Implement proper error handling
+- Add comprehensive logging
+- Write unit tests cho mọi component
+
+### **Documentation Standards:**
+- Mọi tính năng lớn phải có documentation
+- API endpoints phải có Swagger docs
+- Code phải có JSDoc comments
+- README phải được cập nhật
+
+## 🔧 **Development Workflow**
+
+### **Khi bắt đầu tính năng mới:**
+```typescript
+// TODO: [FEATURE_NAME] - Mô tả tính năng
+// Scope: Files sẽ thay đổi
+// Expected: Kết quả mong đợi
+// CHANGELOG: Sẽ cập nhật khi hoàn thành
+```
+
+### **Khi hoàn thành tính năng:**
+```markdown
+## [Unreleased]
+
+### Added
+- **[FEATURE_NAME]**: Mô tả tính năng
+  - Files: `path/to/changed/files`
+  - Impact: Tác động đến project
+```
+
+## 📝 **File Structure Rules**
+
+### **Backend Structure:**
+```
+server/src/modules/
+├── api/                    # Controllers & DTOs
+├── business/services/      # AI Agent services
+├── database/              # Entities & Repositories
+├── worker/                # Background jobs
+└── shared/                # Utilities & Constants
+```
+
+### **Frontend Structure:**
+```
+frontend/src/
+├── components/            # React components
+├── services/              # API services
+├── stores/                # State management
+└── types/                 # TypeScript types
+```
+
+## 🧪 **Testing Rules**
+
+### **Bắt buộc test cho:**
+- ✅ Tất cả AI Agent services
+- ✅ Model factory và tool registry
+- ✅ API endpoints
+- ✅ Frontend components
+- ✅ Database operations
+
+### **Test coverage tối thiểu:**
+- Unit tests: 80%
+- Integration tests: 60%
+- E2E tests: 40%
+
+## 🔒 **Security Rules**
+
+### **AI Model Security:**
+- Không hardcode API keys
+- Validate tất cả input
+- Sanitize output
+- Implement rate limiting
+- Log security events
+
+### **Data Protection:**
+- Encrypt sensitive data
+- Validate user permissions
+- Implement proper authentication
+- Sanitize user inputs
+
+## 📊 **Performance Rules**
+
+### **AI Agent Performance:**
+- Cache model instances
+- Optimize tool execution
+- Monitor response times
+- Implement connection pooling
+- Use async/await properly
+
+### **Frontend Performance:**
+- Implement code splitting
+- Optimize bundle size
+- Use React.memo cho components
+- Implement virtualization cho lists
+
+## 🚀 **Deployment Rules**
+
+### **Environment Configuration:**
+- Sử dụng environment variables
+- Validate required configs
+- Implement health checks
+- Monitor application metrics
+
+### **CI/CD Pipeline:**
+- Run tests trước khi deploy
+- Check code quality
+- Validate documentation
+- Update CHANGELOG.md
+
+## 📚 **Documentation Rules**
+
+### **Bắt buộc document cho:**
+- ✅ AI Agent architecture
+- ✅ API endpoints
+- ✅ Database schema
+- ✅ Deployment process
+- ✅ Development setup
+
+### **Documentation format:**
+- Sử dụng Markdown
+- Include code examples
+- Add diagrams khi cần
+- Keep documentation up-to-date
+
+## 🤝 **Community Rules**
+
+### **Contribution Guidelines:**
+- Follow coding standards
+- Write comprehensive tests
+- Update documentation
+- Add CHANGELOG entries
+- Be respectful và helpful
+
+### **Code Review Checklist:**
+- [ ] Code follows patterns
+- [ ] Tests written và passing
+- [ ] Documentation updated
+- [ ] CHANGELOG.md updated
+- [ ] Security considerations
+- [ ] Performance optimized
+
+## ⚠️ **Important Reminders**
+
+### **Luôn nhớ:**
+1. **Cập nhật CHANGELOG.md** khi hoàn thành tính năng lớn
+2. **Test code** trước khi commit
+3. **Update documentation** khi thay đổi API
+4. **Follow security best practices**
+5. **Monitor performance** metrics
+6. **Be consistent** với coding standards
+
+### **Không được:**
+- ❌ Commit code mà không test
+- ❌ Skip documentation updates
+- ❌ Forget CHANGELOG entries
+- ❌ Hardcode sensitive data
+- ❌ Ignore security warnings
+
+---
+
+**Cursor Rules Team** - Startkit Platform Agent
+
+*Last updated: [Current Date]* 
