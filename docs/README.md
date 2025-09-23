@@ -1,15 +1,18 @@
-# Documentation - StartKit Fullstack
+# Documentation - Chat Widget Q&A for Token Project
 
-Tài liệu chi tiết cho dự án StartKit Fullstack, bao gồm hướng dẫn setup, development, deployment và best practices.
+Tài liệu chi tiết cho dự án Chat Widget Q&A, bao gồm hướng dẫn setup, development, deployment và best practices cho hệ thống AI chatbot nhúng website.
 
 ## 📁 Cấu trúc tài liệu
 
 ```
 docs/
 ├── README.md          # Tài liệu chính (này)
-├── server/            # Tài liệu cho server
-├── frontend/          # Tài liệu cho frontend
-└── landing/           # Tài liệu cho landing page
+├── server/            # Tài liệu cho server (API + AI)
+├── frontend/          # Tài liệu cho chat widget
+├── landing/           # Tài liệu cho demo page
+├── integration/       # Hướng dẫn tích hợp widget
+├── ai-system/         # Tài liệu hệ thống AI
+└── deployment/        # Hướng dẫn deployment
 ```
 
 ## 🚀 Bắt đầu nhanh
@@ -18,59 +21,76 @@ docs/
 ```bash
 # Clone repository
 git clone <repository-url>
-cd startkit-fullstack
+cd agent-prtge
 
 # Cài đặt dependencies
 pnpm install
 
 # Setup environment
 cp server/.env.example server/.env
-cp frontend/.env.example frontend/.env
-cp landing/.env.example landing/.env.local
+# Cập nhật API keys trong .env
 ```
 
 ### 2. Chạy development
 ```bash
-# Terminal 1: Server
+# Terminal 1: Server (API + AI Processing)
 cd server && pnpm run start:dev
 
-# Terminal 2: Frontend
+# Terminal 2: Chat Widget
 cd frontend && pnpm run dev
 
-# Terminal 3: Landing
+# Terminal 3: Demo Landing
 cd landing && pnpm run dev
 ```
 
 ### 3. Truy cập ứng dụng
 - **API**: http://localhost:3000
 - **API Docs**: http://localhost:3000/api
-- **Dashboard**: http://localhost:5173
-- **Landing Page**: http://localhost:3001
+- **Chat Widget**: http://localhost:5173
+- **Demo Landing**: http://localhost:3001
+- **Widget Integration**: http://localhost:5173/widget.js
 
 ## 📚 Tài liệu theo module
 
 ### Server Documentation (`/docs/server/`)
-- [API Reference](./server/api-reference.md)
-- [Database Schema](./server/database-schema.md)
-- [Authentication](./server/authentication.md)
-- [WebSocket Guide](./server/websocket-guide.md)
-- [Queue System](./server/queue-system.md)
-- [Deployment Guide](./server/deployment.md)
+- [API Reference](./server/api-reference.md) - REST API endpoints
+- [Database Schema](./server/database-schema.md) - Database design
+- [AI Processing](./server/ai-processing.md) - OpenAI integration
+- [Data Ingestion](./server/data-ingestion.md) - Crawl API và docs
+- [Vector Database](./server/vector-database.md) - Embeddings storage
+- [Streaming API Guide](./server/streaming-api-guide.md) - Real-time chat
+- [Queue System](./server/queue-system.md) - Background jobs
+- [Deployment Guide](./server/deployment.md) - Production setup
 
 ### Frontend Documentation (`/docs/frontend/`)
-- [Component Library](./frontend/component-library.md)
-- [State Management](./frontend/state-management.md)
-- [Routing Guide](./frontend/routing-guide.md)
-- [API Integration](./frontend/api-integration.md)
-- [Testing Guide](./frontend/testing-guide.md)
-- [Build & Deploy](./frontend/build-deploy.md)
+- [Widget Integration](./frontend/widget-integration.md) - Cách nhúng widget
+- [Component Library](./frontend/component-library.md) - Chat components
+- [State Management](./frontend/state-management.md) - Zustand store
+- [API Integration](./frontend/api-integration.md) - Backend communication
+- [Responsive Design](./frontend/responsive-design.md) - Mobile optimization
+- [Testing Guide](./frontend/testing-guide.md) - Unit tests
+- [Build & Deploy](./frontend/build-deploy.md) - Production build
 
 ### Landing Documentation (`/docs/landing/`)
-- [Page Structure](./landing/page-structure.md)
-- [Blog System](./landing/blog-system.md)
-- [SEO Guide](./landing/seo-guide.md)
-- [Performance](./landing/performance.md)
-- [Analytics](./landing/analytics.md)
+- [Demo Page](./landing/demo-page.md) - Trang demo widget
+- [Widget Showcase](./landing/widget-showcase.md) - Hiển thị tính năng
+- [SEO Guide](./landing/seo-guide.md) - Search optimization
+- [Performance](./landing/performance.md) - Speed optimization
+- [Analytics](./landing/analytics.md) - User tracking
+
+### AI System Documentation (`/docs/ai-system/`)
+- [Vector Search](./ai-system/vector-search.md) - Semantic search
+- [Knowledge Base](./ai-system/knowledge-base.md) - Data management
+- [LLM Integration](./ai-system/llm-integration.md) - OpenAI setup
+- [Citation System](./ai-system/citation-system.md) - Source tracking
+- [Multi-language](./ai-system/multi-language.md) - Language support
+
+### Integration Documentation (`/docs/integration/`)
+- [Quick Start](./integration/quick-start.md) - Setup nhanh
+- [Widget API](./integration/widget-api.md) - API reference
+- [Customization](./integration/customization.md) - Tùy chỉnh giao diện
+- [Advanced Config](./integration/advanced-config.md) - Cấu hình nâng cao
+- [Troubleshooting](./integration/troubleshooting.md) - Xử lý lỗi
 
 ## 🛠️ Development Guides
 
@@ -132,7 +152,7 @@ DATABASE_HOST=localhost
 DATABASE_PORT=5432
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=password
-DATABASE_NAME=startkit_db
+DATABASE_NAME=chat_widget_db
 
 # Redis
 REDIS_HOST=localhost
@@ -144,26 +164,48 @@ JWT_EXPIRES_IN=7d
 
 # API
 API_PORT=3000
+
+# OpenAI
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_MODEL=gpt-4
+OPENAI_EMBEDDING_MODEL=text-embedding-3-large
+
+# PostgreSQL Vector
+POSTGRES_VECTOR_EXTENSION=pgvector
+VECTOR_DIMENSION=3072
+VECTOR_SIMILARITY_THRESHOLD=0.7
+
+# PretgeMarket API
+PRETGE_API_BASE_URL=https://app.pretgemarket.xyz/api/v1
+PRETGE_API_KEY=your-pretge-api-key
+
+# Data Sources
+DOCS_BASE_URL=https://docs.plasma.to/docs
+CRAWL_INTERVAL=3600
+EMBEDDING_BATCH_SIZE=100
 ```
 
 #### Frontend (.env)
 ```env
 # API Configuration
 VITE_API_URL=http://localhost:3000
+VITE_WEBSOCKET_URL=ws://localhost:3000
 VITE_API_TIMEOUT=10000
 
-# App Configuration
-VITE_APP_NAME=StartKit Dashboard
+# Widget Configuration
+VITE_WIDGET_NAME=Token Chat Widget
+VITE_DEFAULT_TOKEN=xpl
 ```
 
 #### Landing (.env.local)
 ```env
 # App Configuration
-NEXT_PUBLIC_APP_NAME=StartKit
+NEXT_PUBLIC_APP_NAME=Token Chat Widget Demo
 NEXT_PUBLIC_APP_URL=http://localhost:3001
 
 # API Configuration
 NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_WIDGET_URL=http://localhost:5173
 ```
 
 ## 🚀 Scripts Reference
@@ -204,20 +246,25 @@ pnpm run lint           # Lint code
 - API response times
 - Error tracking
 - Queue monitoring
+- AI processing metrics
+- Vector search performance
+- Data ingestion status
 
-### Frontend Monitoring
-- Page load times
-- User interactions
-- Error tracking
+### Widget Monitoring
+- Chat interactions
+- Response accuracy
+- User satisfaction
 - Performance metrics
-- User analytics
+- Error tracking
+- Usage analytics
 
 ### Landing Analytics
 - Page views
-- User engagement
+- Widget demos
 - Conversion tracking
 - SEO performance
-- Social media metrics
+- User engagement
+- Integration requests
 
 ## 🔒 Security
 
@@ -346,8 +393,66 @@ DEBUG=* pnpm run dev
 - Documentation improvements
 - Security vulnerabilities
 
+## 🎯 Tính năng chính
+
+### Chat Widget
+- **Context-aware** - Tự động nhận diện token từ URL
+- **Real-time** - Streaming API cho trải nghiệm chat mượt mà
+- **Responsive** - Hoạt động tốt trên mọi thiết bị
+- **Customizable** - Dễ dàng tùy chỉnh giao diện
+
+### AI System
+- **Vector Search** - Tìm kiếm semantic trong knowledge base
+- **Hybrid Retrieval** - Kết hợp keyword và vector search
+- **Citation** - Trả lời kèm nguồn tham khảo
+- **Multi-language** - Hỗ trợ tiếng Việt và tiếng Anh
+
+### Data Management
+- **Auto Sync** - Tự động cập nhật dữ liệu từ API và docs
+- **Delta Update** - Chỉ cập nhật phần thay đổi
+- **Caching** - Redis cache cho performance tốt
+- **Monitoring** - Theo dõi data quality và accuracy
+
+## 🚀 Quick Integration
+
+### 1. Nhúng widget vào website
+```html
+<!-- Thêm script tag vào website -->
+<script src="http://localhost:5173/widget.js"></script>
+<script>
+  TokenChatWidget.init({
+    tokenSlug: 'xpl', // Tự động detect từ URL
+    apiUrl: 'http://localhost:3000',
+    theme: 'light' // hoặc 'dark'
+  });
+</script>
+```
+
+### 2. Tùy chỉnh giao diện
+```css
+/* Custom CSS cho widget */
+.token-chat-widget {
+  --primary-color: #3b82f6;
+  --background-color: #ffffff;
+  --text-color: #1f2937;
+}
+```
+
+### 3. API Integration
+```javascript
+// Gọi API trực tiếp
+const response = await fetch('http://localhost:3000/api/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    tokenSlug: 'xpl',
+    question: 'What is Plasma token?'
+  })
+});
+```
+
 ---
 
-**Documentation Team** - StartKit Fullstack
+**Documentation Team** - Agent PRTGE
 
 *Last updated: [Current Date]* 
