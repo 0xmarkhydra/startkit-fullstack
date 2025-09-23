@@ -15,9 +15,10 @@ export class OpenAIService {
   /**
    * Stream a response from OpenAI API for a given question
    * @param question - The question to send to OpenAI
+   * @param systemPrompt - Optional system prompt for context
    * @returns Observable stream of text chunks
    */
-  streamCompletion(question: string): Observable<string> {
+  streamCompletion(question: string, systemPrompt?: string): Observable<string> {
     return new Observable<string>(observer => {
       const controller = new AbortController();
       const { signal } = controller;
@@ -38,13 +39,17 @@ export class OpenAIService {
           'Content-Type': 'application/json',
         };
 
+        const messages = [
+          { role: 'system', content: systemPrompt || 'You are a helpful assistant.' },
+          { role: 'user', content: question }
+        ];
+
         const data = {
           model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: question }
-          ],
+          messages,
           stream: true,
+          temperature: 0.7,
+          max_tokens: 1000,
         };
 
         console.log(`🔍 [OpenAIService] [streamCompletion] Request data:`, JSON.stringify(data));
