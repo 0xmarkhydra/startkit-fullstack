@@ -43,8 +43,8 @@ export class ChatService {
       
       const processingTime = (Date.now() - startTime) / 1000;
       
-      // Save to chat history
-      const chatMessage = await this.chatHistoryRepository.saveChatMessage(
+      // Save to chat history (both user message and AI response)
+      const chatMessages = await this.chatHistoryRepository.saveChatMessage(
         chatRequest.user_id,
         chatRequest.token_slug,
         chatRequest.question,
@@ -70,7 +70,10 @@ export class ChatService {
         ]
       );
 
-      this.logger.log(`[✅] [ChatService] [processChat] [result]:`, chatMessage);
+      this.logger.log(`[✅] [ChatService] [processChat] [result]:`, chatMessages);
+
+      // Get the AI message (second message in the array)
+      const aiMessage = chatMessages[1];
 
       return {
         answer: aiResponse,
@@ -85,7 +88,7 @@ export class ChatService {
           token_slug: chatRequest.token_slug,
           processing_time: processingTime,
           model_used: 'gpt-4o',
-          message_id: chatMessage.id,
+          message_id: aiMessage.id,
           context_messages: chatHistory.length,
           has_token_data: !!tokenData,
           has_project_data: !!projectData,
@@ -100,8 +103,8 @@ export class ChatService {
       
       // Fallback to mock response if OpenAI fails
       const fallbackAnswer = this.generateMockAnswer(chatRequest.question, chatRequest.token_slug);
-      
-      const chatMessage = await this.chatHistoryRepository.saveChatMessage(
+
+      const fallbackMessages = await this.chatHistoryRepository.saveChatMessage(
         chatRequest.user_id,
         chatRequest.token_slug,
         chatRequest.question,
@@ -115,6 +118,8 @@ export class ChatService {
         []
       );
 
+      const fallbackAiMessage = fallbackMessages[1];
+
       return {
         answer: fallbackAnswer,
         citations: [],
@@ -122,7 +127,7 @@ export class ChatService {
           token_slug: chatRequest.token_slug,
           processing_time: 0.1,
           model_used: 'fallback-mock',
-          message_id: chatMessage.id,
+          message_id: fallbackAiMessage.id,
           error: 'OpenAI service unavailable, using fallback response',
         }
       };

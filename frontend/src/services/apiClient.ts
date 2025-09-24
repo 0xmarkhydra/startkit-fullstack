@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosResponse, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import type { StandardApiResponse } from '../types/auth';
+import { ENV } from '../config/environment';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -8,7 +9,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+      baseURL: ENV.API_URL,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ class ApiClient {
 
   private async refreshToken(refreshToken: string): Promise<string> {
     const response = await axios.post(
-      `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`,
+      `${ENV.API_URL}/auth/refresh`,
       { refreshToken }
     );
     

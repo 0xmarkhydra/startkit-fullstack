@@ -32,19 +32,43 @@ export class ChatHistoryRepository extends Repository<ChatHistoryEntity> {
     answer: string,
     metadata?: any,
     citations?: any[]
-  ): Promise<ChatHistoryEntity> {
-    const messageOrder = await this.getLastMessageOrder(userId, tokenSlug) + 1;
+  ): Promise<ChatHistoryEntity[]> {
+    const lastOrder = await this.getLastMessageOrder(userId, tokenSlug);
     
-    const chatMessage = this.create({
+    // Save user message first
+    const userMessage = this.create({
       user_id: userId,
       token_slug: tokenSlug,
       question,
-      answer,
-      metadata,
-      citations,
-      message_order: messageOrder,
+      answer: '', // Empty answer for user message
+      metadata: {
+        ...metadata,
+        message_type: 'user',
+        timestamp: new Date().toISOString(),
+      },
+      citations: [],
+      message_order: lastOrder + 1,
     });
 
-    return this.save(chatMessage);
+    // Save AI response second
+    const aiMessage = this.create({
+      user_id: userId,
+      token_slug: tokenSlug,
+      question: '', // Empty question for AI message
+      answer,
+      metadata: {
+        ...metadata,
+        message_type: 'ai',
+        timestamp: new Date().toISOString(),
+      },
+      citations,
+      message_order: lastOrder + 2,
+    });
+
+    // Save both messages
+    const savedUserMessage = await this.save(userMessage);
+    const savedAiMessage = await this.save(aiMessage);
+
+    return [savedUserMessage, savedAiMessage];
   }
 }

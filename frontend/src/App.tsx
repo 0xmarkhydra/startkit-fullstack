@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuthStore } from './stores/authStore';
 import { AuthPage } from './pages/AuthPage';
 import { ChatPage } from './pages/ChatPage';
+import { WidgetDemoPage } from './pages/WidgetDemoPage';
 import './App.css';
 
 // Protected Route Component
@@ -39,6 +40,9 @@ function App() {
 
           <Route path="/auth/register" element={<PublicRoute><AuthPage /></PublicRoute>} />
           
+          {/* Widget demo route (no auth required) */}
+          <Route path="/demo" element={<WidgetDemoPage />} />
+          
           {/* Protected routes */}
           <Route 
             path="/chat" 
@@ -52,7 +56,7 @@ function App() {
           {/* Default redirect */}
           <Route 
             path="/" 
-            element={<Navigate to="/chat" />} 
+            element={<Navigate to="/demo" />} 
           />
           
           {/* Catch all route */}
