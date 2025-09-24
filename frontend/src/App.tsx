@@ -59,10 +59,10 @@ function App() {
             element={<Navigate to="/demo" />} 
           />
           
-          {/* Catch all route */}
+          {/* Catch all route - but not for static files */}
           <Route 
             path="*" 
-            element={<Navigate to="/chat" />} 
+            element={<Navigate to="/demo" />} 
           />
         </Routes>
       </div>
